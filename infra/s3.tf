@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "video_bucket" {
-  bucket = "video-app-content-bucket"
+  bucket = "harrybreen-video-content-bucket"
 }
 
 resource "aws_s3_bucket_public_access_block" "video_bucket_block" {
@@ -39,7 +39,7 @@ resource "aws_s3_bucket_policy" "video_bucket_policy" {
 
 # Frontend hosting S3 bucket
 resource "aws_s3_bucket" "frontend_bucket" {
-  bucket = "video-app-frontend-bucket"
+  bucket = "video-frontend-bucket"
 
   tags = {
     Name        = "Video App Frontend Bucket"
@@ -84,3 +84,50 @@ resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
     ]
   })
 }
+
+# CloudFront distribution for the frontend bucket
+resource "aws_cloudfront_distribution" "frontend_distribution" {
+  enabled = true
+
+  origin {
+    domain_name = aws_s3_bucket.frontend_bucket.bucket_regional_domain_name
+    origin_id   = "frontendS3Origin"
+
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.frontend_oai.cloudfront_access_identity_path
+    }
+  }
+
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "frontendS3Origin"
+
+    forwarded_values {
+      query_string = false
+
+      cookies {
+        forward = "none"
+      }
+    }
+
+    viewer_protocol_policy = "redirect-to-https"
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  viewer_certificate {
+    cloudfront_default_certificate = true
+  }
+
+  default_root_object = "index.html"
+}
+
+resource "aws_cloudfront_origin_access_identity" "frontend_oai" {
+  comment = "OAI for frontend S3 bucket"
+}
+
