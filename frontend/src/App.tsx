@@ -1,7 +1,7 @@
 const App = () => {
   return (
     <div>
-        Welcome
+        Welcome to site
     </div>
   )
 }
