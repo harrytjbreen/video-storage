@@ -3,10 +3,10 @@ description: Initializes and applies Terraform infrastructure
 
 inputs:
   aws-access-key-id:
-    description: AWS access key
+    description: AWS Access Key ID
     required: true
   aws-secret-access-key:
-    description: AWS secret
+    description: AWS Secret Access Key
     required: true
   aws-region:
     description: AWS region
@@ -15,6 +15,13 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Export AWS credentials
+      run: |
+        echo "AWS_ACCESS_KEY_ID=${{ inputs.aws-access-key-id }}" >> $GITHUB_ENV
+        echo "AWS_SECRET_ACCESS_KEY=${{ inputs.aws-secret-access-key }}" >> $GITHUB_ENV
+        echo "AWS_REGION=${{ inputs.aws-region }}" >> $GITHUB_ENV
+      shell: bash
+
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v3
       with:
@@ -48,8 +55,3 @@ runs:
     - name: Clean up plan file
       run: rm -f infra/tfplan
       shell: bash
-
-env:
-  AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
-  AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
-  AWS_REGION: ${{ inputs.aws-region }}
