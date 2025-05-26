@@ -7,8 +7,8 @@ resource "aws_cognito_user_pool" "pool" {
 }
 
 resource "aws_cognito_user_pool_client" "app_client" {
-  name         = "video-app-client"
-  user_pool_id = aws_cognito_user_pool.pool.id
+  name            = "video-app-client"
+  user_pool_id    = aws_cognito_user_pool.pool.id
   generate_secret = false
 
   explicit_auth_flows = [

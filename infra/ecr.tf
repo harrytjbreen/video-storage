@@ -20,10 +20,10 @@ resource "aws_ecr_lifecycle_policy" "expire_untagged" {
         rulePriority = 1
         description  = "Expire untagged images after 7 days"
         selection = {
-          tagStatus     = "untagged"
-          countType     = "sinceImagePushed"
-          countUnit     = "days"
-          countNumber   = 1
+          tagStatus   = "untagged"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          countNumber = 1
         }
         action = {
           type = "expire"
