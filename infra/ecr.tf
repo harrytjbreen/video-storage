@@ -23,7 +23,7 @@ resource "aws_ecr_lifecycle_policy" "expire_untagged" {
           tagStatus     = "untagged"
           countType     = "sinceImagePushed"
           countUnit     = "days"
-          countNumber   = 7
+          countNumber   = 1
         }
         action = {
           type = "expire"
