@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  download-service:
+    build:
+      context: ./download-service
+      dockerfile: Dockerfile
+    container_name: download-service
+    restart: no
+    environment:
+      - LOG_LEVEL=info
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

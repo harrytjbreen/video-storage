@@ -1,0 +1,44 @@
+name: Frontend Deploy to S3
+description: Builds and deploys the frontend to S3
+inputs:
+  bucket:
+    description: S3 bucket name
+    required: true
+  aws-access-key-id:
+    description: AWS Access Key ID
+    required: true
+  aws-secret-access-key:
+    description: AWS Secret Access Key
+    required: true
+  aws-region:
+    description: AWS region
+    default: eu-west-1
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      working-directory: ./frontend
+      run: npm ci
+      shell: bash
+
+    - name: Build frontend
+      working-directory: ./frontend
+      run: npm run build
+      shell: bash
+
+    - name: Sync to S3
+      uses: jakejarvis/s3-sync-action@master
+      with:
+        args: --delete
+      env:
+        AWS_S3_BUCKET: ${{ inputs.bucket }}
+        AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
+        AWS_REGION: ${{ inputs.aws-region }}
+        SOURCE_DIR: './frontend/dist'

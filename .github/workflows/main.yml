@@ -1,0 +1,38 @@
+name: Main Deployment Pipeline
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'infra/**'
+      - 'frontend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Check file changes
+        id: changes
+        run: |
+          git fetch origin master --depth=2
+          echo "infra_changed=$(git diff --name-only HEAD^ HEAD | grep '^infra/' | wc -l)" >> $GITHUB_OUTPUT
+          echo "frontend_changed=$(git diff --name-only HEAD^ HEAD | grep '^frontend/' | wc -l)" >> $GITHUB_OUTPUT
+
+      - name: Deploy infrastructure
+        if: steps.changes.outputs.infra_changed != '0'
+        uses: ./.github/actions/infra-deploy
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Deploy frontend
+        if: steps.changes.outputs.frontend_changed != '0'
+        uses: ./.github/actions/frontend-deploy
+        with:
+          bucket: video-frontend-bucket
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

@@ -1,0 +1,55 @@
+name: Deploy Infrastructure
+description: Initializes and applies Terraform infrastructure
+
+inputs:
+  aws-access-key-id:
+    description: AWS access key
+    required: true
+  aws-secret-access-key:
+    description: AWS secret
+    required: true
+  aws-region:
+    description: AWS region
+    default: eu-west-1
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.6.6
+
+    - name: Terraform Init
+      run: terraform init
+      shell: bash
+      working-directory: infra
+
+    - name: Terraform Format Check
+      run: terraform fmt -check
+      shell: bash
+      working-directory: infra
+
+    - name: Terraform Validate
+      run: terraform validate
+      shell: bash
+      working-directory: infra
+
+    - name: Terraform Plan
+      run: terraform plan -out=tfplan
+      shell: bash
+      working-directory: infra
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan
+      shell: bash
+      working-directory: infra
+
+    - name: Clean up plan file
+      run: rm -f infra/tfplan
+      shell: bash
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
+  AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
+  AWS_REGION: ${{ inputs.aws-region }}
